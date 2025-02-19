@@ -30,6 +30,6 @@ Initial release
 
 ### License
 
-MIT
+MIT - https://github.com/toadie83/script2manual/blob/master/LICENSE.md
 
 **Enjoy!**
