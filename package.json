@@ -1,0 +1,37 @@
+{
+  "publisher": "TrevorFrost",
+  "name": "script2manual",
+  "displayName": "Script2Manual",
+  "description": "Convert automation test scripts into manual test cases.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "script2manual.convertTestScript",
+        "title": "Script2Manual: Convert Test Script"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^14.18.63",
+    "typescript": "^4.9.5",
+    "vscode": "^1.1.37",
+    "vscode-test": "^1.6.1"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "dotenv": "^16.4.7",
+    "openai": "^4.85.1"
+  }
+}
