@@ -28,4 +28,8 @@ The extension processes the file and creates a manual test case in your workspac
 
 Initial release
 
+### License
+
+MIT
+
 **Enjoy!**
