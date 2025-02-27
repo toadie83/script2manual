@@ -8,6 +8,18 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
 async function processTestScript(testScript: string, filePath: string) {
+  // Ask the user whether they want the output as TXT or CSV
+  const format = await vscode.window.showQuickPick(["Plain Text", "CSV"], {
+    placeHolder: "Select output format",
+  });
+
+  if (!format) {
+    vscode.window.showWarningMessage(
+      "No format selected. Conversion cancelled."
+    );
+    return;
+  }
+
   // Create the AI prompt
   const prompt = createAIPrompt(testScript);
 
@@ -24,30 +36,140 @@ async function processTestScript(testScript: string, filePath: string) {
     return;
   }
 
+  if (format === "CSV") {
+    // Convert AI response into CSV format
+    try {
+      aiResponse = await convertToCSV(aiResponse);
+    } catch (error) {
+      vscode.window.showErrorMessage("Failed to convert to CSV.");
+      return;
+    }
+  }
+
   // Save the AI response to a file in the workspace folder
+  saveResponseToFile(aiResponse, filePath, format === "CSV" ? "csv" : "txt");
+}
+
+async function convertToCSV(plainTextResponse: string): Promise<string> {
+  const systemMessage = `
+    You are an AI assistant designed to extract structured test cases from unstructured text.
+    Your task is to analyze a provided test case document containing preconditions, steps, and expected results, then convert it into a structured CSV format.
+
+    **Instructions:**
+    
+    **Extract Preconditions:**
+    - Locate the section labeled "Preconditions:" and extract all listed items.
+    - Store these as a single string, separating each precondition with a semicolon (;).
+    - Ensure all test cases include the same preconditions.
+
+    **Extract Test Steps and Expected Results:**
+    - Identify test steps, which start with "Step X:".
+    - Capture all subsequent lines associated with each step until an "Expected Result:" line appears.
+    - Store the step description and details as a single string.
+
+    **Map Steps to Expected Results:**
+    - Ensure each step is placed in the same row as its corresponding expected result.
+    - The expected result should be extracted as-is, removing the "Expected Result:" prefix.
+
+    **Format Output as CSV:**
+    - The CSV should have a minimum of three columns:
+      - Preconditions (Column 1)
+      - Steps (Column 2)
+      - Expected Result (Column 3)
+    - Each test case row should maintain proper alignment between steps and expected results.
+    - Save the file in CSV format with UTF-8 encoding.
+
+    **Example Input:**
+
+    Title:
+    
+    Description:
+    Verify the functionality of the Research Hub page, specifically the Shares Research section.
+
+    Preconditions:
+    - Logged in to the secure site
+    - Have a linked Trading account.
+    - Content preferences are set.
+
+    Test Steps:
+    Step 1: Navigate to Shares Research page
+    - From the Research Hub page, navigate to the "Shares research" page via the header.
+
+    Expected Result: The Shares Research page loads successfully.
+
+    State:
+    Active
+
+    Type:
+    High Level
+
+    Automation:
+    Automated
+
+    **Expected CSV Output with proper line breaks:**
+
+    "Title","Description","Preconditions","Steps","Expected Result","State","Type","Automation"
+    "Verify the functionality of the Research Hub page, specifically the Shares Research section.","Verify the functionality of the Research Hub page, specifically the Shares Research section.","Logged in to the secure site; Have a linked Trading account.; Content preferences are set.","Step 3: Verify available account types and select accounts
+    - Verify the available account types for both 'From' and 'To' accounts.
+    - Select a valid Trading account as the 'From' account.
+    - Verify the available account types for the 'To' account.","The available account types should be correctly listed for selection.","Active","High Level","Automated"
+
+    Ensure proper handling of line breaks, quotation marks, and special characters for accurate CSV formatting.
+  `;
+
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemMessage },
+          { role: "user", content: plainTextResponse }, // Injects AI's first response
+        ],
+        max_tokens: 8000,
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to convert response to CSV.");
+  }
+}
+
+function saveResponseToFile(
+  response: string,
+  filePath: string,
+  extension: string
+) {
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders) {
     vscode.window.showErrorMessage("No workspace folder is open.");
     return;
   }
 
-  // Get the base file name without extension (e.g., "loggingIn" from "loggingIn.ts")
   const baseName = path.basename(filePath, path.extname(filePath));
   const outputFilePath = path.join(
     workspaceFolders[0].uri.fsPath,
-    `s2mTestcase-${baseName}.txt`
+    `s2mTestcase-${baseName}.${extension}`
   );
 
-  fs.writeFile(outputFilePath, aiResponse, async (err) => {
+  fs.writeFile(outputFilePath, response, async (err) => {
     if (err) {
       vscode.window.showErrorMessage("Failed to write the file.");
       return;
     }
     vscode.window.showInformationMessage(
-      `Manual test case generated at: ${outputFilePath}`
+      `Test case generated at: ${outputFilePath}`
     );
 
-    // Automatically open the generated file in a new editor tab
     try {
       const doc = await vscode.workspace.openTextDocument(outputFilePath);
       await vscode.window.showTextDocument(doc);
@@ -66,6 +188,9 @@ function createAIPrompt(testScript: string): string {
       - Test steps
       - Expected results
       - Overall expected outcome
+      - State
+      - Type
+      - Automation
 
     Script:
     ${testScript}
@@ -83,28 +208,54 @@ async function callOpenAIAPI(prompt: string): Promise<string> {
   const systemMessage = `Use the automated test script provided to write a manual test script.
 
 - ignore the imports.
-- Tests should be written using **test steps** and **expected results**.
-- The **step and results should be created from the "it" block statements primarily**.
-- **Method names** in the provided script **should help summarize the goal of the test step** but should not be directly referenced.
-- **Do not create a test step for every method.**
-- There should be **a minimum of one test step per "it" block**, but no more than **three per block**.
-- **Preconditions should be included.**
-- **Summarize the overall expected result at the end.**
+- Tests should be written using **test steps** and **expected results**.  
+- The **step and results should be created from the "it" block statements primarily**.  
+- **Method names** in the provided script **should help summarize the goal of the test step** but should not be directly referenced.  
+- **Do not create a test step for every method.**  
+- There should be **a minimum of one test step per "it" block**, but no more than **three per block**.  
+- Steps should avoid using Commas.
+- **Preconditions should be included.**  
+- **Leave Title blank**
+- **Description should be a high level summary of the test**
+- If the code contains a FOR loop, each loop should have its own test step and expected result.
+- State: should be "Active"
+- Type: should be "High Level"
+- Automation: should be "Automated"
+- **Summarize the overall expected result at the end.**  
 - responses should be formatted with minimal spacing
 
 ### **Response Format:**
+
 \`\`\`
+Title:
+"insert title here"
+
+Description:
+Ensure the research hub loads
+
+
 Preconditions:
 - Logged in to the secure site
 - Have a linked Trading account.
 
 Test Steps:
-Step 1: Navigate to the Research Hub within the Secure Site
-- Set content preferences using a valid account.
-- Log in to the secure site using a valid account email.
-- Navigate to the "Research Hub" page via the header.
+Step 1: Navigate to the Research Hub within the Secure Site  
+- Set content preferences using a valid account.  
+- Log in to the secure site using a valid account email.  
+- Navigate to the "Research Hub" page via the header.  
 
+ 
 Expected Result: The Research Hub page loads successfully.
+
+State:
+Active
+
+Type:
+High Level
+
+Automation:
+Automated
+
 \`\`\``;
 
   try {

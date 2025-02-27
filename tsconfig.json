@@ -11,5 +11,5 @@
     "moduleResolution": "node",
     "types": ["vscode", "node", "mocha"]
   },
-  "exclude": ["node_modules", ".vscode-test"]
+  "exclude": ["**/testScenarioOne.ts", "node_modules", ".vscode-test"]
 }

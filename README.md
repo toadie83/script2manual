@@ -28,6 +28,10 @@ The extension processes the file and creates a manual test case in your workspac
 
 Initial release
 
+### 1.0.1
+
+Added support for CSV exports
+
 ### License
 
 MIT - https://github.com/toadie83/script2manual/blob/master/LICENSE.md
