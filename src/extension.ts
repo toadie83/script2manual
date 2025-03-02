@@ -7,17 +7,43 @@ import * as dotenv from "dotenv";
 // Load environment variables from .env (located in the project root)
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
-async function processTestScript(testScript: string, filePath: string) {
-  // Ask the user whether they want the output as TXT or CSV
-  const format = await vscode.window.showQuickPick(["Plain Text", "CSV"], {
-    placeHolder: "Select output format",
-  });
+function getUserSettings() {
+  const config = vscode.workspace.getConfiguration("script2manual");
+  const apiKey = config.get<string>("apiKey", "");
+  const fileNaming = config.get<string>("fileNaming", "default");
+  const autoOpenFile = config.get<boolean>("autoOpenFile", false);
+  const defaultOutputFileType = config.get<string>(
+    "defaultOutputFileType",
+    "ask"
+  );
+  return { apiKey, fileNaming, autoOpenFile, defaultOutputFileType };
+}
 
-  if (!format) {
-    vscode.window.showWarningMessage(
-      "No format selected. Conversion cancelled."
+async function processTestScript(testScript: string, filePath: string) {
+  // Retrieve user settings, including the new defaultOutputFileType setting.
+  const { defaultOutputFileType } = getUserSettings();
+
+  let format: string;
+
+  if (defaultOutputFileType === "ask") {
+    const selectedFormat = await vscode.window.showQuickPick(
+      ["Plain Text", "CSV"],
+      {
+        placeHolder: "Select output format",
+      }
     );
-    return;
+    if (!selectedFormat) {
+      vscode.window.showWarningMessage(
+        "No format selected. Conversion cancelled."
+      );
+      return;
+    }
+    format = selectedFormat; // selectedFormat is now guaranteed to be a string.
+  } else if (defaultOutputFileType === "csv") {
+    format = "CSV";
+  } else {
+    // defaultOutputFileType === "plaintext"
+    format = "Plain Text";
   }
 
   // Create the AI prompt
@@ -157,11 +183,15 @@ function saveResponseToFile(
       `Test case generated at: ${outputFilePath}`
     );
 
-    try {
-      const doc = await vscode.workspace.openTextDocument(outputFilePath);
-      await vscode.window.showTextDocument(doc);
-    } catch (openErr) {
-      vscode.window.showErrorMessage("Failed to open the generated file.");
+    // Get the autoOpenFile setting and only open the file if true.
+    const { autoOpenFile } = getUserSettings();
+    if (autoOpenFile) {
+      try {
+        const doc = await vscode.workspace.openTextDocument(outputFilePath);
+        await vscode.window.showTextDocument(doc);
+      } catch (openErr) {
+        vscode.window.showErrorMessage("Failed to open the generated file.");
+      }
     }
   });
 }

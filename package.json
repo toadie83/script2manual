@@ -2,7 +2,7 @@
   "name": "script2manual",
   "displayName": "Script2Manual",
   "publisher": "Script2Manual",
-  "version": "1.0.2 ",
+  "version": "1.0.3",
   "description": "Visual Studio Code Extension for converting automation test scripts into manual test cases.",
   "icon": "resources/icon.png",
   "galleryBanner": {
@@ -20,7 +20,38 @@
         "command": "script2manual.convertTestScript",
         "title": "Script2Manual: Convert Test Script"
       }
-    ]
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Script2Manual Settings",
+      "properties": {
+        "script2manual.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API Key for Script2Manual. (Keep it secure!)"
+        },
+        "script2manual.fileNaming": {
+          "type": "string",
+          "default": "default",
+          "description": "Rules for file naming."
+        },
+        "script2manual.autoOpenFile": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically open the generated file upon conversion."
+        },
+        "script2manual.defaultOutputFileType": {
+          "type": "string",
+          "enum": [
+            "ask",
+            "csv",
+            "plaintext"
+          ],
+          "default": "ask",
+          "description": "Default output file type: 'ask' each time (current behavior), 'csv' for always CSV, or 'plaintext' for always Plain Text."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

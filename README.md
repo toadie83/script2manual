@@ -1,39 +1,85 @@
-# script2manual README
+# **Script2Manual - VS Code Extension**
 
-Script2Manual is a Visual Studio Code extension that converts automated test scripts written in TypeScript into detailed manual test cases. Leveraging OpenAI's ChatGPT API, it transforms test code into clear, human-readable test instructions that include preconditions, test steps, and expected results.
+**Script2Manual** is a Visual Studio Code extension that converts automated test scripts written in TypeScript into detailed manual test cases. Leveraging an integrated AI solution, it transforms test code into clear, human-readable test instructions that include **preconditions, test steps, and expected results**.
 
-## Features
+---
 
-Automated Conversion: Transforms TypeScript test scripts (using the page object model) into manual test cases.
-Custom System Prompt: Uses a custom system prompt to ensure consistent formatting and focus on test step summarization.
-Dynamic File Naming: Generates an output file with the original script's name (e.g., manual-test-case-loggingIn.txt).
-Seamless Integration: Easily invoked from the VS Code Command Palette.
+## **🚀 Features**
 
-## Requirements
+✅ **Automated Conversion**: Transforms TypeScript test scripts (using the page object model) into structured manual test cases.  
+✅ **Custom System Prompt**: Uses a predefined system prompt to ensure consistent formatting and test step summarization.  
+✅ **Dynamic File Naming**: Automatically names output files based on the original test script.  
+✅ **CSV or Plain Text Export**: Generate test cases in **plain text** or **CSV format** for test management tools.  
+✅ **Seamless Integration**: Easily invoked from the VS Code **Command Palette**.  
+✅ **User-configurable Settings**: Customize output behavior through the **VS Code settings menu**.
 
-Visual Studio Code
+---
 
-## Extension Settings
+## **📌 Requirements**
 
-Open the Command Palette in VS Code (Ctrl+Shift+P or Cmd+Shift+P).
-Run the command: Script2Manual: Convert Test Script.
-Select the desired TypeScript test script file.
-The extension processes the file and creates a manual test case in your workspace folder.
+- Visual Studio Code (Latest version recommended)
 
-## Known Issues
+---
 
-## Release Notes
+## **🛠 Usage Instructions**
 
-### 1.0.0
+1️⃣ Open the **Command Palette** in VS Code (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac).  
+2️⃣ Run the command: **"Script2Manual: Convert Test Script"**.  
+3️⃣ Select the desired TypeScript test script file.  
+4️⃣ The extension processes the file and generates a **manual test case** in your workspace folder.
 
-Initial release
+---
 
-### 1.0.1
+## **⚙ Extension Settings**
 
-Added support for CSV exports
+You can configure settings in **VS Code Settings (`Ctrl+,` or `Cmd+,`)** by searching for **"Script2Manual"**.
 
-### License
+### **Available Settings**
 
-MIT - https://github.com/toadie83/script2manual/blob/master/LICENSE.md
+| Setting                               | Description                                                                                                                | Default     |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `script2manual.defaultOutputFileType` | Set the default output file type. Options: `ask` (prompt every time), `csv` (always CSV), `plaintext` (always Plain Text). | `ask`       |
+| `script2manual.autoOpenFile`          | Automatically open the generated file upon conversion.                                                                     | `false`     |
+| `script2manual.apiKey`                | Stores your OpenAI API Key securely.                                                                                       | _(empty)_   |
+| `script2manual.fileNaming`            | Allows customization of output file naming rules.                                                                          | `"default"` |
 
-**Enjoy!**
+---
+
+## **🐞 Known Issues**
+
+🔹 No major issues reported. If you encounter a problem, please submit an issue on [GitHub](https://github.com/toadie83/script2manual/issues).
+
+---
+
+## **📜 Release Notes**
+
+### **📌 1.0.3 - Latest Release**
+
+✅ **Enhancements & Features:**
+
+- **Added a Settings Menu**: Users can now configure extension behavior.
+- **New Setting: Default Output File Type**: Choose between `Ask each time`, `Always CSV`, or `Always Plain Text`.
+- **New Setting: Automatically Open Generated File**: Option to automatically open test cases after generation.
+- **Refactored Settings for Better Control**: Consolidated file format options into a single setting.
+
+### **📌 1.0.2**
+
+- Fixed support for CSV exports.
+
+### **📌 1.0.1**
+
+- Added support for CSV exports.
+
+### **📌 1.0.0**
+
+- Initial release.
+
+---
+
+## **📜 License**
+
+📄 MIT License - [View License](https://github.com/toadie83/script2manual/blob/master/LICENSE.md)
+
+---
+
+**🎉 Enjoy using Script2Manual! If you like it, consider leaving a review! 🚀**
