@@ -37,9 +37,9 @@ async function processTestScript(testScript: string, filePath: string) {
   }
 
   if (format === "CSV") {
-    // Convert AI response into CSV format
+    // Convert AI response into CSV format, passing the filePath
     try {
-      aiResponse = await convertToCSV(aiResponse);
+      aiResponse = await convertToCSV(aiResponse, filePath);
     } catch (error) {
       vscode.window.showErrorMessage("Failed to convert to CSV.");
       return;
@@ -50,7 +50,13 @@ async function processTestScript(testScript: string, filePath: string) {
   saveResponseToFile(aiResponse, filePath, format === "CSV" ? "csv" : "txt");
 }
 
-async function convertToCSV(plainTextResponse: string): Promise<string> {
+async function convertToCSV(
+  plainTextResponse: string,
+  filePath: string
+): Promise<string> {
+  // Extract the filename without extension (e.g., "loginTest" from "loginTest.ts")
+  const fileName = path.basename(filePath, path.extname(filePath));
+
   const systemMessage = `
     You are an AI assistant designed to extract structured test cases from unstructured text.
     Your task is to analyze a provided test case document containing preconditions, steps, and expected results, then convert it into a structured CSV format.
@@ -72,49 +78,25 @@ async function convertToCSV(plainTextResponse: string): Promise<string> {
     - The expected result should be extracted as-is, removing the "Expected Result:" prefix.
 
     **Format Output as CSV:**
-    - The CSV should have a minimum of three columns:
-      - Preconditions (Column 1)
-      - Steps (Column 2)
-      - Expected Result (Column 3)
-    - Each test case row should maintain proper alignment between steps and expected results.
-    - Save the file in CSV format with UTF-8 encoding.
+    - The first row **must always** be the header row with column names:
+      - "Title","Description","Preconditions","Steps","Expected Result","State","Type","Automation"
+    - Each subsequent row should represent a test case, ensuring **no blank rows** at the start.
+    - The title should be set to the filename: **"${fileName}"**.
+    - All text should be enclosed in double quotes to prevent formatting issues.
+    - No additional empty lines should appear before or after the CSV content.
+    - Save the file in **CSV format with UTF-8 encoding**.
 
-    **Example Input:**
-
-    Title:
-    
-    Description:
-    Verify the functionality of the Research Hub page, specifically the Shares Research section.
-
-    Preconditions:
-    - Logged in to the secure site
-    - Have a linked Trading account.
-    - Content preferences are set.
-
-    Test Steps:
-    Step 1: Navigate to Shares Research page
-    - From the Research Hub page, navigate to the "Shares research" page via the header.
-
-    Expected Result: The Shares Research page loads successfully.
-
-    State:
-    Active
-
-    Type:
-    High Level
-
-    Automation:
-    Automated
-
-    **Expected CSV Output with proper line breaks:**
-
+    **Example Output (Correct Format):**
     "Title","Description","Preconditions","Steps","Expected Result","State","Type","Automation"
-    "Verify the functionality of the Research Hub page, specifically the Shares Research section.","Verify the functionality of the Research Hub page, specifically the Shares Research section.","Logged in to the secure site; Have a linked Trading account.; Content preferences are set.","Step 3: Verify available account types and select accounts
+    "${fileName}","Verify the functionality of the Research Hub page, specifically the Shares Research section.","Logged in to the secure site; Have a linked Trading account.; Content preferences are set.","Step 3: Verify available account types and select accounts
     - Verify the available account types for both 'From' and 'To' accounts.
     - Select a valid Trading account as the 'From' account.
     - Verify the available account types for the 'To' account.","The available account types should be correctly listed for selection.","Active","High Level","Automated"
 
-    Ensure proper handling of line breaks, quotation marks, and special characters for accurate CSV formatting.
+    Ensure that:
+    - There are **no extra empty lines or characters before the first row**.
+    - All columns are consistently aligned with properly escaped quotation marks where necessary.
+    - The generated output should be ready for direct import into a test management tool.
   `;
 
   try {
@@ -137,7 +119,12 @@ async function convertToCSV(plainTextResponse: string): Promise<string> {
       }
     );
 
-    return response.data.choices[0].message.content.trim();
+    let csvOutput = response.data.choices[0].message.content.trim();
+
+    // Remove unintended leading characters or extra newlines
+    csvOutput = csvOutput.replace(/^\s*[\r\n]+/, "");
+
+    return csvOutput;
   } catch (error) {
     console.error(error);
     throw new Error("Failed to convert response to CSV.");
@@ -226,7 +213,6 @@ async function callOpenAIAPI(prompt: string): Promise<string> {
 
 ### **Response Format:**
 
-\`\`\`
 Title:
 "insert title here"
 
@@ -256,7 +242,7 @@ High Level
 Automation:
 Automated
 
-\`\`\``;
+`;
 
   try {
     const response = await axios.post(
