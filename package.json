@@ -2,7 +2,7 @@
   "name": "script2manual",
   "displayName": "Script2Manual",
   "publisher": "Script2Manual",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Visual Studio Code Extension for converting automation test scripts into manual test cases.",
   "icon": "resources/icon.png",
   "galleryBanner": {

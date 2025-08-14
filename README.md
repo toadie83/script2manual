@@ -53,11 +53,27 @@ You can configure settings in **VS Code Settings (`Ctrl+,` or `Cmd+,`)** by sear
 
 ## **📜 Release Notes**
 
-### **📌 1.0.4 - Latest Release**
+### **📌 1.0.5 - Latest Release**
 
-- Updated API key
+✅ **Enhancements & Improvements:**
 
-### **📌 1.0.3 **
+- **Improved OpenAI Error Handling**:
+
+  - Now displays clear, user-friendly messages for common API errors (invalid/missing key, quota issues, rate limits, etc.).
+  - Added “Copy details” option for full technical error output, including OpenAI’s raw response for debugging.
+  - Error logs now include request IDs (when available) for easier support and troubleshooting.
+
+- **API Key Resolution**:
+  - The extension now correctly checks for keys set in the `script2manual.apiKey` setting if one exists
+  - Ensures users can configure or replace keys directly in VS Code
+
+---
+
+### **📌 1.0.4**
+
+- Updated API key.
+
+### **📌 1.0.3**
 
 ✅ **Enhancements & Features:**
 
