@@ -110,7 +110,7 @@ async function convertToCSV(
     - The title should be set to the filename: **"${fileName}"**.
     - All text should be enclosed in double quotes to prevent formatting issues.
     - No additional empty lines should appear before or after the CSV content.
-    - Save the file in **CSV format with UTF-8 encoding**.
+    - Save the file in **CSV format with UTF-8 encoding**. 
 
     **Example Output (Correct Format):**
     "Title","Description","Preconditions","Steps","Expected Result","State","Type","Automation"
