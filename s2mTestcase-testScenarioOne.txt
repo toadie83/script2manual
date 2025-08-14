@@ -1,0 +1,65 @@
+Title:
+""
+
+Description:
+Test the user journey on My Big Software Company including login navigation and document management features.
+
+Preconditions:
+- User must have valid login credentials
+- User must have access to the account and documents sections
+
+Test Steps:
+Step 1: Navigate to the login page  
+- Open the application and go to the login page.  
+
+Expected Result: The login page is displayed.
+
+Step 2: Enter valid username and password  
+- Input "testuser" as the username.  
+- Input "Test@1234" as the password.  
+- Click on the submit button.  
+
+Expected Result: User is logged in successfully and redirected to the account page.
+
+Step 3: Navigate to the documents section  
+- Click on the documents section from the account page.  
+
+Expected Result: The documents section is displayed.
+
+Step 4: Verify previous month statements are displayed  
+- Check that statements for the previous month are visible in the documents section.  
+
+Expected Result: Previous month statements are successfully displayed.
+
+Step 5: Open filter options for documents  
+- Click on the filter options button in the documents section.  
+
+Expected Result: Filter options are displayed.
+
+Step 6: Set a specific date range for filtering  
+- Input "2023-08-01" as the start date.  
+- Input "2023-08-31" as the end date.  
+- Click on the apply filter button.  
+
+Expected Result: The filter is applied successfully.
+
+Step 7: Verify filtered results are displayed  
+- Check that results for the date range "2023-08" are visible.  
+
+Expected Result: Filtered results for August 2023 are displayed.
+
+Step 8: Check visibility of the download statement button  
+- Look for the download statement button in the documents section.  
+
+Expected Result: The download statement button is visible.
+
+Overall Expected Outcome: The user is able to log in, navigate to the documents section, filter documents by date range, and see the download button.
+
+State:
+Active
+
+Type:
+High Level
+
+Automation:
+Automated

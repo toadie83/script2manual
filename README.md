@@ -53,7 +53,11 @@ You can configure settings in **VS Code Settings (`Ctrl+,` or `Cmd+,`)** by sear
 
 ## **📜 Release Notes**
 
-### **📌 1.0.3 - Latest Release**
+### **📌 1.0.4 - Latest Release**
+
+- Updated API key
+
+### **📌 1.0.3 **
 
 ✅ **Enhancements & Features:**
 
